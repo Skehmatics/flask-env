@@ -82,7 +82,7 @@ class TestFlaskEnv(unittest.TestCase):
         env = dict(
             IS_TRUE='true',
             IS_NOT_TRUE='true-ish',
-            IS_FALSE='FALSE',
+            IS_FALSE='false',
             IS_WACKY_FALSE='FaLSe',
         )
         with self.with_env(**env):
@@ -91,7 +91,7 @@ class TestFlaskEnv(unittest.TestCase):
             self.assertEqual(TestConfiguration.IS_TRUE, True)
             self.assertEqual(TestConfiguration.IS_NOT_TRUE, 'true-ish')
             self.assertEqual(TestConfiguration.IS_FALSE, False)
-            self.assertEqual(TestConfiguration.IS_WACKY_FALSE, False)
+            self.assertEqual(TestConfiguration.IS_WACKY_FALSE, 'FaLSe')
 
     def test_parsing_float(self):
         """A test to ensure that we properly parse floats"""
@@ -105,8 +105,8 @@ class TestFlaskEnv(unittest.TestCase):
             # DEV: Set `env_load_all=True` to keep from having to make default values for each variable
             TestConfiguration = self._get_test_configuration(env_load_all=True)
             self.assertEqual(TestConfiguration.IS_FLOAT, 12.5)
-            self.assertEqual(TestConfiguration.TRAILING_DOT, 12.0)
-            self.assertEqual(TestConfiguration.LEADING_DOT, 0.12)
+            self.assertEqual(TestConfiguration.TRAILING_DOT, '12.')
+            self.assertEqual(TestConfiguration.LEADING_DOT, '.12')
             self.assertEqual(TestConfiguration.IS_NOT_FLOAT, 'This is 6.5')
 
     def test_parsing_int(self):
@@ -122,6 +122,22 @@ class TestFlaskEnv(unittest.TestCase):
             self.assertEqual(TestConfiguration.IS_INT, 12)
             self.assertEqual(TestConfiguration.IS_ZERO, 0)
             self.assertEqual(TestConfiguration.IS_NOT_INT, '12fa')
+
+    def test_parsing_dict(self):
+        """A test to ensure that we properly parse dicts"""
+        env = dict(
+            IS_EMPTY_DICT='{}',
+            IS_DICT_WITH_LIST='{"a": [1, 2, 3]}',
+            IS_DICT_WITH_STRING='{"foo": "bar"}',
+            IS_NOT_DICT='{not a dict}',
+        )
+        with self.with_env(**env):
+            # DEV: Set `env_load_all=True` to keep from having to make default values for each variable
+            TestConfiguration = self._get_test_configuration(env_load_all=True)
+            self.assertEqual(TestConfiguration.IS_EMPTY_DICT, {})
+            self.assertEqual(TestConfiguration.IS_DICT_WITH_LIST, {'a': [1, 2, 3]})
+            self.assertEqual(TestConfiguration.IS_DICT_WITH_STRING, {'foo': 'bar'})
+            self.assertEqual(TestConfiguration.IS_NOT_DICT, '{not a dict}')
 
 
 if __name__ == '__main__':

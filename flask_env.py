@@ -1,4 +1,5 @@
 import os
+import json
 
 
 class MetaFlaskEnv(type):
@@ -29,22 +30,12 @@ class MetaFlaskEnv(type):
             if not load_all and not hasattr(cls, key):
                 continue
 
-            # If value is "true" or "false", parse as a boolean
-            # Otherwise, if it contains a "." then try to parse as a float
-            # Otherwise, try to parse as an integer
-            # If all else fails, just keep it a string
-            if value.lower() in ('true', 'false'):
-                value = True if value.lower() == 'true' else False
-            elif '.' in value:
-                try:
-                    value = float(value)
-                except ValueError:
-                    pass
-            else:
-                try:
-                    value = int(value)
-                except ValueError:
-                    pass
+            # Parse value according to JSON standards
+            # If that fails, just keep it a string
+            try:
+                value = json.loads(value)
+            except ValueError:
+                pass
 
             # Update our config with the value from `os.environ`
             setattr(cls, key, value)
